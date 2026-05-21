@@ -1,0 +1,33 @@
+services:
+  # IMAP Server - Apple Notes
+  imap-server:
+    image: mailserver/docker-mailserver:latest
+    container_name: apple-imap
+    ports:
+      - "143:143"
+    environment:
+      OVERRIDE_HOSTNAME: pineapple.cloud
+      ENABLE_POP3: "0"
+      ENABLE_SMTP: "0"
+      ENABLE_SPAMASSASSIN: "0"
+      ENABLE_CLAMAV: "0"
+      ENABLE_FAIL2BAN: "0"
+      ONE_DIR: "1"
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./data/mail-data:/var/mail
+      - ./data/mail-config:/tmp/docker-mailserver
+    restart: unless-stopped
+
+  # DAV Server - Apple Contacts, Calendar and Reminders
+  radicale:
+    image: tomsquest/docker-radicale:latest
+    container_name: apple-dav
+    ports:
+      - "5232:5232"
+    volumes:
+      - ./data/radicale-data:/data
+      - ./data/radicale-config:/config:ro
+      - ./data/radicale-certs:/certs:ro
+    restart: unless-stopped

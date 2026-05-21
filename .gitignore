@@ -1,0 +1,23 @@
+# User Data and Configuration
+data/
+
+# MacOS - System files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows - System files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Certificates
+*.pem
+*.key
+*.crt
+*.pfx
+
+# Logs and PKI
+*.log
+.pki/
