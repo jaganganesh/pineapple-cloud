@@ -5,6 +5,7 @@ services:
     container_name: apple-imap
     ports:
       - "143:143"
+      - "993:993"
     environment:
       OVERRIDE_HOSTNAME: pineapple.cloud
       ENABLE_POP3: "0"
@@ -13,11 +14,18 @@ services:
       ENABLE_CLAMAV: "0"
       ENABLE_FAIL2BAN: "0"
       ONE_DIR: "1"
+      ENABLE_IMAP: "1"
+      TLS_LEVEL: "modern"
+      SSL_TYPE: "manual"
+      SSL_CERT_PATH: /certs/server.crt
+      SSL_KEY_PATH: /certs/server.key
     cap_add:
       - NET_ADMIN
     volumes:
       - ./data/mail-data:/var/mail
       - ./data/mail-config:/tmp/docker-mailserver
+      - ./data/radicale-certs/radicale.crt:/certs/server.crt:ro
+      - ./data/radicale-certs/radicale.key:/certs/server.key:ro
     restart: unless-stopped
 
   # DAV Server - Apple Contacts, Calendar and Reminders
@@ -26,6 +34,8 @@ services:
     container_name: apple-dav
     ports:
       - "5232:5232"
+    environment:
+      - OVERRIDE_HOSTNAME=pineapple.cloud
     volumes:
       - ./data/radicale-data:/data
       - ./data/radicale-config:/config:ro
