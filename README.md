@@ -6,49 +6,144 @@
 ![Last Commit](https://img.shields.io/github/last-commit/jaganganesh/pineapple-cloud)
 [![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/jaganganesh)
 
-The minimalist, ultra-lightweight, self-hosted privacy alternative to iCloud.
+> Keep your Apple ecosystem. Keep your data yours.
+
+A lightweight, privacy-first, self-hosted iCloud alternative for Apple users.
+
+Pineapple Cloud lets you sync natively:
+
+- 📝 Apple Notes
+- 🗓️ Calendar
+- ✅ Reminders
+- 👤 Contacts
+
+across macOS and iOS using a minimal Docker stack powered by:
+
+- CalDAV
+- CardDAV
+- Local IMAP
+
+Designed for:
+
+- Raspberry Pi
+- Synology NAS
+- Mini PCs
+- Homelabs
+- Privacy-conscious Apple users
+
+All while using **under 100MB of idle RAM**.
 
 <img src="./assets/images/pineapple-cloud.png" alt="Pineapple Cloud" width="400">
 
-**pineapple-cloud** unifies your **native macOS & iOS Apps (Contacts, Calendar, Reminders, and Notes)** into a single, highly efficient Docker stack running completely on your local network.
+# ✨ Why Pineapple Cloud?
 
-Unlike heavy groupware solutions like Nextcloud, which demand over 1GB of RAM and put a heavy load on budget systems, **pineapple-cloud runs under 100MB of idle RAM**. It is optimized to keep mini-servers, Raspberry Pis, and budget NAS units (like the Synology J-series) running cool and responsive.
+Most self-hosted collaboration platforms are massive.
 
-## 🚀 Why pineapple-cloud?
+| Platform             | Typical RAM Usage |
+| :------------------- | :---------------- |
+| Nextcloud            | 1GB+              |
+| Full mail suites     | Heavy             |
+| Enterprise groupware | Complex           |
+| **Pineapple Cloud**  | **<100MB**        |
 
-Apple's native device ecosystem splits accounts across two entirely distinct sync protocols:
+Pineapple Cloud was built for people who want:
 
-1. **CalDAV & CardDAV:** Controls native Calendar timelines, Reminders checklists, and Contact cards.
-2. **IMAP (Mail Server Storage):** Operates quietly behind the scenes to sync Apple Notes.
+- native Apple app compatibility
+- self-hosted privacy
+- ultra-lightweight infrastructure
+- simple Docker deployment
+- zero vendor lock-in
 
-**pineapple-cloud** bridges this gap inside an isolated Docker network by pairing a local **IMAP Mailserver Container** with the streamlined **Radicale DAV Engine**. No bloated databases or heavy web UI dashboards—just clean, protocol-native syncing.
+No Electron apps.
+No bloated dashboards.
+No subscriptions.
+No telemetry.
 
-## ✨ Features & Ecosystem Benefits
+Just native Apple apps syncing directly with infrastructure you control.
 
-- 📝 **Native Apple Notes Sync:** Handled natively via local IMAP. No public mail routing or domain MX records required.
-- 🗓️ **Native Apple Calendar & Reminders:** Managed directly by Radicale's lightning-fast CalDAV engine.
-- 👤 **Native Apple Contacts:** Instant address book populating via CardDAV.
-- 🪶 **Low-Resource Engineering:** Under 100MB RAM usage. Minimizes hard drive swap-writes, making it highly safe during sudden power interruptions.
-- 📦 **Fully Portable Volume Layout:** Relative pathing structures (`./data`) let you migrate your entire setup between hosts instantly.
+# 🔒 Privacy First
 
-## 🛠️ Complete Installation Blueprint
+Pineapple Cloud keeps your data:
 
-### 1. Initialize Your Directory Structure
+- on your hardware
+- inside your network
+- under your control
 
-Open your terminal and create the configuration tree:
+No third-party cloud sync providers.
+No analytics.
+No forced accounts.
+No external dependency chains.
+
+Your Notes, Calendars, Contacts, and Reminders stay yours.
+
+# 🚀 Features
+
+- 🍎 Native Apple Notes sync using local IMAP
+- 🗓️ Native Apple Calendar & Reminders sync via CalDAV
+- 👤 Native Apple Contacts sync via CardDAV
+- 🪶 Ultra-lightweight architecture (<100MB idle RAM)
+- 🐳 Simple Docker Compose deployment
+- 🏠 Optimized for Raspberry Pi and NAS systems
+- 📦 Portable volume-based storage
+- 🔒 Local-first privacy-focused design
+- ⚡ Fast startup and low CPU overhead
+
+# 🧠 How It Works
+
+Apple uses multiple sync systems internally:
+
+| Apple Service | Protocol |
+| ------------- | -------- |
+| Calendar      | CalDAV   |
+| Reminders     | CalDAV   |
+| Contacts      | CardDAV  |
+| Apple Notes   | IMAP     |
+
+Pineapple Cloud combines:
+
+- **Radicale** → CalDAV + CardDAV
+- **Local IMAP Mail Server** → Apple Notes syncing
+
+inside a lightweight isolated Docker stack.
+
+# 🏗️ Architecture
+
+```text
+             macOS / iPhone / iPad
+                       │
+        ┌──────────────┴──────────────┐
+        │                             │
+   Radicale Container           IMAP Container
+ (Calendar / Contacts)          (Apple Notes)
+        │                             │
+        └────── Docker Network ───────┘
+```
+
+# ⚡ Quick Start
+
+## 1. Clone the Repository
 
 ```bash
-mkdir -p pineapple-cloud/data/mail-data pineapple-cloud/data/mail-config pineapple-cloud/data/radicale-data pineapple-cloud/data/radicale-config pineapple-cloud/data/radicale-certs
+git clone https://github.com/jaganganesh/pineapple-cloud.git
 cd pineapple-cloud
 ```
 
-### 2. Configure Your Docker Compose Environment
+## 2. Create the Required Directories
 
-Create a file named `docker-compose.yml` and add the verified container service definition layer:
+```bash
+mkdir -p \
+data/mail-data \
+data/mail-config \
+data/radicale-data \
+data/radicale-config \
+data/radicale-certs
+```
+
+## 3. Create `docker-compose.yml`
 
 ```yaml
 services:
-  # IMAP Server - Apple Notes
+  # Apple Notes (IMAP)
   imap-server:
     image: mailserver/docker-mailserver:latest
     container_name: apple-imap
@@ -68,8 +163,7 @@ services:
       - ./data/mail-data:/var/mail
       - ./data/mail-config:/tmp/docker-mailserver
     restart: unless-stopped
-
-  # DAV Server - Apple Contacts, Calendar and Reminders
+  # Contacts / Calendars / Reminders (CardDAV, CalDav)
   radicale:
     image: tomsquest/docker-radicale:latest
     container_name: apple-dav
@@ -82,104 +176,281 @@ services:
     restart: unless-stopped
 ```
 
-### 3. Spin Up the Containers
-
-Launch the core architecture in detached background mode:
+## 4. Start the Stack
 
 ```bash
 docker compose up -d
 ```
 
-### 4. Provisioning the Apple Notes IMAP Mailbox
+# 📬 Create Your Apple Notes Account
 
-To add your account, drop into the running container's bash shell and use the internal interactive account provisioning script:
+Apple Notes sync requires a local IMAP mailbox.
 
-Step A: Access the container shell:
+## Enter the container
 
 ```bash
 docker exec -it apple-imap /bin/bash
 ```
 
-Step B: Inside the container prompt, execute the setup script with your chosen identity details and password:
+## Create a user
 
 ```bash
 setup email add your_name@pineapple.cloud
-your_secure_password
 ```
 
-Type `exit` to return to your host terminal when completed.
+Then enter your password when prompted.
 
-## 🔐 SSL/TLS Certificate Setup Guide
-
-By default, Apple devices prefer encrypted connections. You have two options to manage your setup:
-
-### Option A: Using Self-Signed Certificates (Secure & Recommended)
-
-To prevent clear-text transfer warnings, generate local self-signed SSL certificates using OpenSSL:
+Exit the container afterward:
 
 ```bash
-openssl req -x509 -newkey rsa:4096 -keyout ./data/radicale-certs/server.key -out ./data/radicale-certs/server.cert -sha256 -days 3650 -nodes -subj "/CN=127.0.0.1"
+exit
 ```
 
-Once generated, double-click the `server.cert` file on your Mac to open **Keychain Access**, locate the certificate, and change its properties to **"Always Trust"**.
+# 🔐 SSL / TLS Setup
 
-### Option B: Using Unencrypted HTTP/Plain text
+Apple devices strongly prefer encrypted connections.
 
-If you run pineapple-cloud strictly on `127.0.0.1` (localhost) or an isolated home router subnet without setting up SSL, macOS will flag the plain-text traffic. When connecting, you must confirm the warning exceptions manually.
+## Option A — Self-Signed Certificates (Recommended)
 
-## 🖥️ macOS Internet Accounts Configuration Guide
+Generate certificates locally:
 
-Open **System Settings ➔ Internet Accounts** on your Mac and bind each native service step-by-step using your screenshots as references:
+```bash
+openssl req -x509 \
+-newkey rsa:4096 \
+-keyout ./data/radicale-certs/server.key \
+-out ./data/radicale-certs/server.cert \
+-sha256 \
+-days 3650 \
+-nodes \
+-subj "/CN=127.0.0.1"
+```
 
-### 1. Connecting Contacts (CardDAV Layer)
+On macOS:
 
-- Navigate to **Add Account... ➔ Add Other Account... ➔ CardDAV Account**.
-- Change the **Account Type** selector from Automatic to **Manual**.
-- **User Name:** Your Radicale username.
-- **Server Address:** `127.0.0.1` (or your mini-server network IP).
-- **Server Path:** `/` | **Port:** `5232`
-- _Note:_ Uncheck **Use SSL** if accessing via HTTP. Check it if you generated local keys.
+1. Open `server.cert`
+2. Launch **Keychain Access**
+3. Set certificate trust to:
+   - **Always Trust**
+
+## Option B — Local HTTP Only
+
+If running exclusively on:
+
+- localhost
+- isolated LAN
+- private homelab subnet
+
+you may choose to skip TLS.
+
+macOS and iOS will display warning prompts during setup.
+
+# 🍎 macOS Setup Guide
+
+Open:
+
+```text
+System Settings → Internet Accounts
+```
+
+## 👤 Contacts (CardDAV)
+
+Navigate to:
+
+```text
+Add Account → Add Other Account → CardDAV Account
+```
+
+Use:
+
+| Field          | Value                  |
+| -------------- | ---------------------- |
+| Account Type   | Manual                 |
+| Username       | Your Radicale username |
+| Password       | Your password          |
+| Server Address | 127.0.0.1              |
+| Port           | 5232                   |
+| Server Path    | /                      |
+
+If using HTTP:
+
+- Disable SSL
+
+If using certificates:
+
+- Enable SSL
 
 <img src="./assets/images/cardDAV.png" alt="CardDAV - Apple Contacts" width="400">
 
-### 2. Connecting Calendars & Reminders (CalDAV Layer)
+## 🗓️ Calendars & Reminders (CalDAV)
 
-- Navigate to **Add Account... ➔ Add Other Account... ➔ CalDAV Account**.
-- Change the **Account Type** selector to **Manual**.
-- Input your username and password database configurations as shown:
+Navigate to:
+
+```text
+Add Account → Add Other Account → CalDAV Account
+```
+
+Use the same credentials configured in Radicale.
 
 <img src="./assets/images/calDAV.png" alt="CalDAV - Apple Calendar and Reminders" width="400">
 
-### 3. Connecting Apple Notes (IMAP Layer)
+## 📝 Apple Notes (IMAP)
 
-- Navigate to **Add Account... ➔ Add Other Account... ➔ Mail Account**.
-- Use your configured full email domain address (e.g., `your_name@pineapple.cloud`).
-- When the "Unable to verify" prompt displays, pass the local loopback server IPs:
-  - **Incoming Mail Server:** `127.0.0.1`
-  - **Outgoing Mail Server (SMTP):** `127.0.0.1`
-- Finalize the profile layer by **unchecking Mail** and exclusively **checking Notes**.
+Navigate to:
+
+```text
+Add Account → Add Other Account → Mail Account
+```
+
+Use:
+
+| Field                | Value                                                         |
+| -------------------- | ------------------------------------------------------------- |
+| Email                | [your_name@pineapple.cloud](mailto:your_name@pineapple.cloud) |
+| Incoming Mail Server | 127.0.0.1                                                     |
+| Outgoing Mail Server | 127.0.0.1                                                     |
+
+When setup completes:
+
+- ❌ Disable Mail
+- ✅ Enable Notes
 
 <img src="./assets/images/noteIMAP.png" alt="IMAP - Apple Notes" width="400">
 
-## ⚠️ Known Apple Ecosystem Limitations (IMAP Restrictions)
+# ⚠️ Apple Notes Limitations
 
-Because Apple strips rich canvas properties when a note is stored over open IMAP protocols rather than inside iCloud core servers, the following features will be modified:
+Apple Notes over IMAP is more limited than native iCloud Notes.
 
-- 🚫 Detailed font-size selectors and custom heading typography templates are disabled.
-- 🚫 Native interactive checkbox bubbles, vector sketches, and inline database tables are restricted.
-- _💡 Pro-Tip:_ Utilize traditional typography elements like **Bold (`Cmd+B`)**, _Italics (`Cmd+I`)_, or standard hyphens/asterisks (`* `) to create clean, readable lists that render perfectly into plain text HTML folders.
+The following features are reduced or unavailable:
 
-## 🤝 Contributing & Star Support
+- ❌ advanced typography styles
+- ❌ rich heading templates
+- ❌ interactive checklists
+- ❌ inline sketches
+- ❌ advanced embedded objects
 
-Have improvements or configuration profiles to share?
+For best compatibility:
 
-1. Fork the codebase.
-2. Cut an active development branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your adjustments (`git commit -m 'feat: optimize connection handling'`).
-4. Push to your branch and open a Pull Request targeting our `develop` tracking branch.
+- use standard text
+- use bold/italics
+- use markdown-style lists
 
-**If this project helped you reclaim ownership of your personal data, drop a ⭐ to help other Apple power-users discover us!**
+Basic note synchronization works reliably.
 
-## ⚖️ License
+# 🪶 Lightweight by Design
 
-**pineapple-cloud** is open-source software distributed under the terms of the [GNU GPLv3 (or later)](LICENSE) license.
+Pineapple Cloud is intentionally engineered for low-resource systems.
+
+Perfect for:
+
+- Raspberry Pi Zero 2 W, 3 Model B/B+, 400, 4 Model B, 5
+- Synology J-series
+- Intel N100 mini PCs
+- Low-power NAS systems
+
+Designed to minimize:
+
+- RAM usage
+- disk writes
+- CPU overhead
+- thermal load
+
+Ideal for always-on homelab deployments.
+
+# 🏠 Tested Platforms
+
+- ✅ macOS
+- ✅ iOS
+- ✅ Apple Silicon Macs
+- ✅ Raspberry Pi OS
+- ✅ Ubuntu Server
+- ✅ Docker
+- ✅ Synology NAS
+
+# 📦 Portable Storage Layout
+
+All persistent data lives inside:
+
+```text
+./data
+```
+
+This makes migrations extremely simple.
+
+Move your stack between machines by copying:
+
+```text
+./data
+```
+
+and redeploying the containers.
+
+# 🆚 Comparison
+
+| Feature               | Pineapple Cloud | Nextcloud | iCloud |
+| --------------------- | --------------- | --------- | ------ |
+| Apple Notes Sync      | ✅              | ❌        | ✅     |
+| Native Apple Apps     | ✅              | Partial   | ✅     |
+| Self-Hosted           | ✅              | ✅        | ❌     |
+| Lightweight           | ✅              | ❌        | N/A    |
+| Raspberry Pi Friendly | ✅              | ⚠️ Heavy  | ❌     |
+| Docker Compose        | ✅              | ✅        | ❌     |
+| Vendor Lock-In        | ❌              | ❌        | ✅     |
+| Privacy First         | ✅              | ⚠️        | ❌     |
+
+# 🧭 Why Self-Host?
+
+Cloud convenience should not require surrendering ownership of your personal data.
+
+Pineapple Cloud gives Apple users a way to preserve the native experience they already love while moving synchronization back onto infrastructure they control.
+
+Your server.
+Your rules.
+Your data.
+
+# 🤝 Contributing
+
+Contributions are welcome.
+
+1. Fork the repository
+2. Create a feature branch
+
+```bash
+git checkout -b feature/amazing-feature
+```
+
+3. Commit your changes
+
+```bash
+git commit -m "feat: add amazing feature"
+```
+
+4. Push to your branch
+
+```bash
+git push origin feature/amazing-feature
+```
+
+5. Open a Pull Request
+
+# ⭐ Support the Project
+
+If Pineapple Cloud helped you reclaim ownership of your Apple data:
+
+- ⭐ Star the repository
+- 🍴 Fork the project
+- 🧠 Share it with the self-hosted community
+- 🛠️ Contribute improvements
+
+Helping others discover the project makes a huge difference.
+
+# ⚖️ License
+
+Licensed under the GNU GPLv3 License.
+
+See:
+
+```text
+LICENSE
+```
+
+for details.
